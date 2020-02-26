@@ -1,0 +1,9 @@
+[
+  {
+    "name": "com.kenai.jffi.Foreign",
+    "allDeclaredConstructors": true,
+    "allPublicConstructors": true,
+    "allDeclaredMethods": true,
+    "allPublicMethods": true
+  }
+]
