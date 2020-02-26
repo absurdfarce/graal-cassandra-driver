@@ -56,3 +56,7 @@ This is consistent with the [stated limitation on dynamic class loading](https:/
 
 ## jnr-ffi Platform Support
 As mentioned above the driver attempts to retrieve CPU information via jnr.ffi.Platform.  This class is loaded via reflection from within com.datastax.oss.driver.internal.core.os.Native so including it within the reflection config appears to be adequate.
+
+Note that we also have to add platform-specific type support as well; thus the inclusion of jnr.ffi.Platform$Linux in addition to jnr.ffi.Platform.  This has the result of making the generated image platform-specific.
+
+## jnr-posix POSIX Support
