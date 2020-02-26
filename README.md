@@ -55,8 +55,9 @@ As mentioend above jnr-ffi will attempt to dynamically create a class implementi
 This is consistent with the [stated limitation on dynamic class loading](https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md#dynamic-class-loading--unloading) in the Graal docs.  There's no obvious way around this problem; it looks like asm-generated proxies are simply not usable in a Graal context.
 
 ## jnr-ffi Platform Support
-As mentioned above the driver attempts to retrieve CPU information via jnr.ffi.Platform.  This class is loaded via reflection from within com.datastax.oss.driver.internal.core.os.Native so including it within the reflection config appears to be adequate.
+As mentioned above the driver attempts to retrieve CPU information via jnr.ffi.Platform.  This class computes a set of platform-specific values based on common system properties: it doesn't execute any native code.  It's loaded via reflection from within com.datastax.oss.driver.internal.core.os.Native so including it within the reflection config appears to be adequate.
 
 Note that we also have to add platform-specific type support as well; thus the inclusion of jnr.ffi.Platform$Linux in addition to jnr.ffi.Platform.  This has the result of making the generated image platform-specific.
 
 ## jnr-posix POSIX Support
+com.datastax.oss.driver.internal.core.os.Native leverage jnr-posix to obtain the current PID.  Ultimately this appears to use [the same jnr-ffi library loading code](https://github.com/jnr/jnr-posix/blob/jnr-posix-3.0.50/src/main/java/jnr/posix/POSIXFactory.java#L289) used above, meaning it also can't be made to work in a Graal native image.
