@@ -1,0 +1,40 @@
+package com.datastax.graal;
+
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.internal.core.os.Native;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.varia.NullAppender;
+
+import java.io.File;
+import java.net.InetSocketAddress;
+
+/**
+ * Extremely simple command-line application which counts and displays the number of keyspaces in 
+ * the local instance.
+ */
+public class KeyspaceCounter {
+
+  public static void main(String[] args) throws Exception {
+
+    if (args.length > 0 && args[0].equalsIgnoreCase("debug")) {
+      BasicConfigurator.configure();
+    } else {
+      BasicConfigurator.configure(new NullAppender());
+    }
+
+    CqlSession session =
+        CqlSession.builder()
+            .addContactPoint(new InetSocketAddress("localhost", 9042))
+            .withLocalDatacenter("Graph")
+            .build();
+
+    int result = 0;
+    for (Row row : session.execute("select keyspace_name from system_schema.keyspaces")) {
+      ++result;
+    }
+    System.out.println(result);
+
+    session.close();
+  }
+}

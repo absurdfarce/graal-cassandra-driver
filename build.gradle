@@ -1,0 +1,52 @@
+buildscript {
+    repositories {
+	    mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.palantir.graal' version '0.6.0-93-g176e02b'
+    id "com.google.osdetector" version "1.6.2"
+}
+
+graal {
+    outputName 'keyspaceCounter'
+    mainClass 'com.datastax.example.CountApp'
+    graalVersion '19.2.1'
+    option '--allow-incomplete-classpath'
+    option '--report-unsupported-elements-at-runtime'
+    option '-H:IncludeResources=.*reference\\.conf'
+    option '-H:IncludeResources=.*Driver\\.properties'
+    option '-H:IncludeResources=jni/.*'
+    option '-H:+JNI'
+    option '-H:+ReportExceptionStackTraces'
+
+    // Fallout from adding support for dynamic proxies of LibC
+    option '--initialize-at-build-time=jnr.ffi.Pointer'
+    option '--initialize-at-build-time=jnr.ffi.Struct'
+    option '--initialize-at-build-time=jnr.ffi.provider.LoadedLibrary'
+    option '--initialize-at-build-time=com.datastax.oss.driver.internal.core.os.Native$LibCLoader$LibC'
+    option '--initialize-at-build-time=com.datastax.oss.driver.internal.core.os.Native$LibCLoader$Timeval'
+}
+
+mainClassName = 'com.datastax.graal.KeyspaceCounter'
+
+dependencies {
+    compile 'com.datastax.oss:java-driver-core:4.4.0'
+
+    // Satisfying some odd CNFEs that happen when building the image.  Looks to be caused
+    // by attempts to execute at compile-time code which should execute at run-time.
+    compile 'log4j:log4j:1.2.16'
+    compile 'org.conscrypt:conscrypt-openjdk:2.2.1:' + osdetector.classifier
+
+    // Since we have log4j in the classpath now let's do something useful with it
+    compile 'org.slf4j:slf4j-log4j12:1.7.26'
+    
+    testCompile 'junit:junit:4.12'
+}
+
+repositories {
+    mavenCentral()
+}
