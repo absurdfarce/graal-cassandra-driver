@@ -44,11 +44,12 @@ Once we've accounted for the dynamic proxies above we immediately run into anoth
 
 As mentioend above jnr-ffi will attempt to dynamically create a class implementing the library interface via asm.  The output of this process is then used to generate a dynamic class via ClassLoader.defineClass() [here](https://github.com/jnr/jnr-ffi/blob/jnr-ffi-2.1.10/src/main/java/jnr/ffi/provider/jffi/AsmLibraryLoader.java#L235).  This results in the following error message in the log4j output:
 
-> 31 [s0-admin-0] DEBUG com.datastax.oss.driver.internal.core.os.Native  - Error loading libc                                                                                    > java.lang.RuntimeException: com.oracle.svm.core.jdk.UnsupportedFeatureError: Unsupported method java.lang.ClassLoader.defineClass(String, byte[], int, int) is reachable: The declaring class of this element has been substituted, but this element is not present in the substitution class
+> 31 [s0-admin-0] DEBUG com.datastax.oss.driver.internal.core.os.Native  - Error loading libc
+> java.lang.RuntimeException: com.oracle.svm.core.jdk.UnsupportedFeatureError: Unsupported method java.lang.ClassLoader.defineClass(String, byte[], int, int) is reachable: The declaring class of this element has been substituted, but this element is not present in the substitution class
 >        at jnr.ffi.provider.jffi.AsmLibraryLoader.generateInterfaceImpl(AsmLibraryLoader.java:247)
 >        at jnr.ffi.provider.jffi.AsmLibraryLoader.loadLibrary(AsmLibraryLoader.java:89)
->          at jnr.ffi.provider.jffi.NativeLibraryLoader.loadLibrary(NativeLibraryLoader.java:44)
+>        at jnr.ffi.provider.jffi.NativeLibraryLoader.loadLibrary(NativeLibraryLoader.java:44)
 >        at jnr.ffi.LibraryLoader.load(LibraryLoader.java:325)
->          at jnr.ffi.LibraryLoader.load(LibraryLoader.java:304)
+>        at jnr.ffi.LibraryLoader.load(LibraryLoader.java:304)
 
 This is consistent with the [stated limitation on dynamic class loading](https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md#dynamic-class-loading--unloading) in the Graal docs.  There's no obvious way around this problem; it looks like asm-generated proxies are simply not usable in a Graal context.
