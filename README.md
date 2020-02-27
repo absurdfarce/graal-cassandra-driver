@@ -52,7 +52,9 @@ As mentioend above jnr-ffi will attempt to dynamically create a class implementi
 >        at jnr.ffi.LibraryLoader.load(LibraryLoader.java:325)
 >        at jnr.ffi.LibraryLoader.load(LibraryLoader.java:304)
 
-This is consistent with the [stated limitation on dynamic class loading](https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md#dynamic-class-loading--unloading) in the Graal docs.  There's no obvious way around this problem; it looks like asm-generated proxies are simply not usable in a Graal context.
+This is consistent with the [stated limitation on dynamic class loading](https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md#dynamic-class-loading--unloading) in the Graal docs.
+
+There is a workaround for this problem, but it's not terribly intuitive.  jnr-ffi allows for the creation of a Proxy for the underlying library rather than creation of a new class via ASM.  This is configured via the system property "jnr.ffi.asm.enabled" (see [here](https://github.com/jnr/jnr-ffi/blob/jnr-ffi-2.1.10/src/main/java/jnr/ffi/provider/jffi/NativeLibraryLoader.java#L43-L45) for more detail).  Setting this to "false" moves past this error, although again this is far from an obvious solution to the problem.
 
 ## jnr-ffi Platform Support
 As mentioned above the driver attempts to retrieve CPU information via jnr.ffi.Platform.  This class computes a set of platform-specific values based on common system properties: it doesn't execute any native code.  It's loaded via reflection from within com.datastax.oss.driver.internal.core.os.Native so including it within the reflection config appears to be adequate.
