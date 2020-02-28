@@ -23,6 +23,10 @@ public class KeyspaceCounter {
       BasicConfigurator.configure(new NullAppender());
     }
 
+    /* Graal does not currently support runtime class generation via something like ASM so we
+       explicitly fall back to jnr.ffi.provider.jffi.ReflectionLibraryLoader here */
+    System.setProperty("jnr.ffi.asm.enabled","false");
+
     CqlSession session =
         CqlSession.builder()
             .addContactPoint(new InetSocketAddress("localhost", 9042))
