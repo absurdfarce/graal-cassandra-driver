@@ -154,14 +154,6 @@
     "allPublicMethods": true
   },
   {
-    "name": "java.nio.DirectByteBuffer",
-    "allDeclaredConstructors": true,
-    "allPublicConstructors": true,
-    "allDeclaredMethods": true,
-    "allPublicMethods": true,
-    "fields": [{"name":"cleaner"}]
-  },
-  {
     "name": "org.apache.log4j.Category",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
