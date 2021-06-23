@@ -36,7 +36,7 @@ nativeImage {
 mainClassName = 'com.datastax.graal.KeyspaceCounter'
 
 dependencies {
-    implementation 'com.datastax.oss:java-driver-core:4.9.0'
+    implementation 'com.datastax.oss:java-driver-core:4.10.0'
 
     // Satisfying some odd CNFEs that happen when building the image.  Looks to be caused
     // by attempts to execute at compile-time code which should execute at run-time.
