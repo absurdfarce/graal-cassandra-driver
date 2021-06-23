@@ -1,78 +1,55 @@
 buildscript {
     repositories {
-	    mavenCentral()
+	mavenCentral()
     }
 }
 
 plugins {
     id 'java'
     id 'application'
-    id 'com.palantir.graal' version '0.6.0-93-g176e02b'
     id "com.google.osdetector" version "1.6.2"
+    id 'org.mikeneck.graalvm-native-image' version '1.4.1'
 }
 
-graal {
-    outputName 'keyspaceCounter'
-    mainClass 'com.datastax.graal.KeyspaceCounter'
-    graalVersion '19.2.1'
-    option '--allow-incomplete-classpath'
-    option '--report-unsupported-elements-at-runtime'
-
-    // We're mainly interested in defining the proxy used by jnr-ffi to interact with libc here.
-    // See the various initialize-at-build-time configs below for more on this point.
-    option '-H:DynamicProxyConfigurationFiles=proxy.json'
-
-    // Most of the contents here are various components of the driver which are instantiated via
-    // reflection.  There are a few jffi classes which are also created by reflection.  I'm not
-    // quite clear on what's instantiating the log4j classes but they also appear to be necessary.
-    option '-H:ReflectionConfigurationFiles=reflection.json'
-
-    // jffi's Foreign class is the only entity that's actually executing JNI calls; the other layers
-    // in the jnr-ffi/jffi stack are doing dynamic proxy ops.
-    option '-H:JNIConfigurationFiles=jni.json'
-
-    // The HOCON config defaults for the driver
-    option '-H:IncludeResources=.*reference\\.conf'
-
-    // Resource used by DefaultMavenCoordinates within the driver
-    option '-H:IncludeResources=.*Driver\\.properties'
-
-    // The libs used by jffi to execute native ops
-    option '-H:IncludeResources=jni/.*'
-
-    // JNI should be enabled; jffi (via jnr-ffi) will execute native ops via
-    // JNI on our behalf
-    option '-H:+JNI'
-    option '-H:+ReportExceptionStackTraces'
-
-    // The driver's Native class will use jnr-ffi to create an interface into libc.  This will result in the
-    // creation of a Java proxy for the libc interface, but for Graal native images any such proxies must
-    // be declared at build-time.  This forces the interfaces implemented by our proxy (LibC and LoadedLibrary)
-    // to be eval'd at build time, which in turn causes a few other classes used in those interfaces to need
-    // to be eval'd at build time as well.
-    option '--initialize-at-build-time=jnr.ffi.provider.LoadedLibrary'
-    option '--initialize-at-build-time=com.datastax.oss.driver.internal.core.os.Native$LibCLoader$LibC'
-    option '--initialize-at-build-time=com.datastax.oss.driver.internal.core.os.Native$LibCLoader$Timeval'
-    option '--initialize-at-build-time=jnr.ffi.Pointer'
-    option '--initialize-at-build-time=jnr.ffi.Struct'
+nativeImage {
+    graalVmHome = System.getenv('GRAALVM_HOME')
+    mainClass = 'com.datastax.graal.KeyspaceCounter'
+    executableName = 'keyspaceCounter'
+    arguments {
+	add '--allow-incomplete-classpath'
+	// report-unsupported-elements-at-runtime can lead to some unpleasant side effects when used
+	// with production code; see https://github.com/oracle/graal/issues/1725 for more details.
+	//add '--report-unsupported-elements-at-runtime'
+	add '-H:IncludeResources=.*reference\\.conf'
+	add '-H:IncludeResources=.*Driver\\.properties'
+	add '-H:DynamicProxyConfigurationFiles=proxy.json'
+	add '-H:ReflectionConfigurationFiles=reflection.json'
+	add '-H:+ReportExceptionStackTraces'
+	//'-H:+JNI',
+	//'-H:JNIConfigurationFiles=jni.json',
+	//'-H:IncludeResources=jni/.*',
+	add '--no-fallback'
+	add '--verbose'
+    }
 }
 
 mainClassName = 'com.datastax.graal.KeyspaceCounter'
 
 dependencies {
-    compile 'com.datastax.oss:java-driver-core:4.4.0'
+    implementation 'com.datastax.oss:java-driver-core:4.9.0'
 
     // Satisfying some odd CNFEs that happen when building the image.  Looks to be caused
     // by attempts to execute at compile-time code which should execute at run-time.
-    compile 'log4j:log4j:1.2.16'
-    compile 'org.conscrypt:conscrypt-openjdk:2.2.1:' + osdetector.classifier
+    implementation 'log4j:log4j:1.2.16'
+    implementation 'org.conscrypt:conscrypt-openjdk:2.2.1:' + osdetector.classifier
 
     // Since we have log4j in the classpath now let's do something useful with it
-    compile 'org.slf4j:slf4j-log4j12:1.7.26'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.26'
     
-    testCompile 'junit:junit:4.12'
+    //testCompile 'junit:junit:4.12'
 }
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }

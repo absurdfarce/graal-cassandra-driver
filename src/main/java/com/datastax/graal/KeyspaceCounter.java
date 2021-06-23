@@ -2,11 +2,9 @@ package com.datastax.graal;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.Row;
-import com.datastax.oss.driver.internal.core.os.Native;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.varia.NullAppender;
 
-import java.io.File;
 import java.net.InetSocketAddress;
 
 /**
@@ -25,12 +23,12 @@ public class KeyspaceCounter {
 
     /* Graal does not currently support runtime class generation via something like ASM so we
        explicitly fall back to jnr.ffi.provider.jffi.ReflectionLibraryLoader here */
-    System.setProperty("jnr.ffi.asm.enabled","false");
+    //System.setProperty("jnr.ffi.asm.enabled","false");
 
     CqlSession session =
         CqlSession.builder()
             .addContactPoint(new InetSocketAddress("localhost", 9042))
-            .withLocalDatacenter("Graph")
+            .withLocalDatacenter("datacenter1")
             .build();
 
     int result = 0;

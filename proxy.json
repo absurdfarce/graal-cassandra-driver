@@ -1,4 +1,3 @@
 [
-    ["java.lang.reflect.TypeVariable"],
-    ["com.datastax.oss.driver.internal.core.os.Native$LibCLoader$LibC", "jnr.ffi.provider.LoadedLibrary"]
+    ["java.lang.reflect.TypeVariable"]
 ]
