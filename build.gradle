@@ -38,15 +38,7 @@ mainClassName = 'com.datastax.graal.KeyspaceCounter'
 dependencies {
     implementation 'com.datastax.oss:java-driver-core:4.10.0'
 
-    // Satisfying some odd CNFEs that happen when building the image.  Looks to be caused
-    // by attempts to execute at compile-time code which should execute at run-time.
-    implementation 'log4j:log4j:1.2.16'
     implementation 'org.conscrypt:conscrypt-openjdk:2.2.1:' + osdetector.classifier
-
-    // Since we have log4j in the classpath now let's do something useful with it
-    implementation 'org.slf4j:slf4j-log4j12:1.7.26'
-    
-    //testCompile 'junit:junit:4.12'
 }
 
 repositories {
